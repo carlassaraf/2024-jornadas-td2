@@ -42,6 +42,12 @@ set(CORE ARM_CM0)
 # Set FreeRTOS source directory
 set(PICO_SDK_FREERTOS_SOURCE freertos)
 
+if(${PICO_BOARD} STREQUAL "pico2")
+    set(CORE RP2350_ARM_NTZ)
+elseif(${PICO_BOARD} STREQUAL "pico")
+    set(CORE RP2040)
+endif()
+
 # Add FreeRTOS libraries
 add_library(freertos
     ${PICO_SDK_FREERTOS_SOURCE}/event_groups.c
@@ -50,16 +56,25 @@ add_library(freertos
     ${PICO_SDK_FREERTOS_SOURCE}/stream_buffer.c
     ${PICO_SDK_FREERTOS_SOURCE}/tasks.c
     ${PICO_SDK_FREERTOS_SOURCE}/timers.c
-    ${PICO_SDK_FREERTOS_SOURCE}/portable/MemMang/heap_4.c
-    ${PICO_SDK_FREERTOS_SOURCE}/portable/GCC/ARM_CM0/port.c
+    ${PICO_SDK_FREERTOS_SOURCE}/portable/MemMang/heap_3.c
+    ${PICO_SDK_FREERTOS_SOURCE}/portable/GCC/${CORE}/port.c
 )
+
+if(${CORE} STREQUAL "RP2350_ARM_NTZ")
+target_sources(freertos PRIVATE
+    ${PICO_SDK_FREERTOS_SOURCE}/portable/GCC/${CORE}/mpu_wrappers_v2_asm.c
+    ${PICO_SDK_FREERTOS_SOURCE}/portable/GCC/${CORE}/portasm.c
+)
+endif()
 
 # Include FreeRTOS header files
 target_include_directories(freertos PUBLIC
     .
     ${PICO_SDK_FREERTOS_SOURCE}/include
-    ${PICO_SDK_FREERTOS_SOURCE}/portable/GCC/ARM_CM0
+    ${PICO_SDK_FREERTOS_SOURCE}/portable/GCC/${CORE}/include
 )
+
+target_link_libraries(freertos pico_stdlib hardware_exception pico_multicore)
 
 # Add executable. Default name is the project name, version 0.1
 
