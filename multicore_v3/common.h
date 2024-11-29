@@ -3,10 +3,16 @@
 
 #include "pico/util/queue.h"
 
+#define PICO
+
 // GPIO del LED de la placa
 #define LED 25
 // Mascara para interrupcion de Timer
+#ifdef PICO2
+#define TIMER_IRQ_MASK  (1 << TIMER0_IRQ_0 | 1 << TIMER0_IRQ_1 | 1 << TIMER0_IRQ_2 | 1 << TIMER0_IRQ_3)
+#elif defined(PICO)
 #define TIMER_IRQ_MASK  (1 << TIMER_IRQ_0 | 1 << TIMER_IRQ_1 | 1 << TIMER_IRQ_2 | 1 << TIMER_IRQ_3)
+#endif
 
 /**
  * Estructura para mandar datos del ADC
